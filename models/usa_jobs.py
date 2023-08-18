@@ -32,29 +32,3 @@ class UsaJobs(Base):
     evaluations: Mapped[str]
     requiremed_documents: Mapped[str]
     relevance_rank: Mapped[int]
-
-
-sql = '''
-CREATE TABLE toggl.usa_jobs (
-    id bigint PRIMARY KEY, -- MatchedObjectID
-    title text, -- PositionTitle
-    position_uri text, --PositionURI
-    apply_uri text, --ApplyURI
-    country text, --PositionLocation[0]['CountryCode']
-    region text, --PositionLocation[0]['CountrySubDivisionCode']
-    city text, --PositionLocation[0]['CityName']
-    organization_name text, --OrganizationName
-    department_name text,  --DepartmentName
-    job_category text, --JobCategory[0]['Name']
-    qualification_summary text, --QualificationSummary
-    renumeration_min double, --PositionRenumeration[0]['MinimumRange']
-    renumeration_max double, --PositionRenumeration[0]['MaximumRange']
-    application_start date,  --ApplicationStartDate
-    application_end date,    --ApplicationCloseDate
-    requirements text,       --UserArea['Requirements']
-    evaluations text,        --UserArea['Evaluations']
-    required_documents,      --UserArea['RequiredDocuments']
-    relevance_rank int       --RelevanceRank
-)
-
-'''
