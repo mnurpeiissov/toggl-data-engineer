@@ -1,0 +1,32 @@
+version: '3'
+services:
+  postgres:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: root
+      POSTGRES_DB: toggl
+      POSTGRES_PORT: 54321
+    ports:
+      - "54321:5432"
+  crawler:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file: 
+      - .env
+    command:
+      - sh
+      - entrypoint.sh
+    depends_on:
+      - postgres
+  cron:
+    image: alpine:latest
+    container_name: my-cron
+    volumes:
+      - ./cron-scripts:/cron-scripts
+    depends_on:
+      - postgres
+    command: sh -c "crond -f"
+    env_file: .env
+  
