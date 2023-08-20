@@ -1,0 +1,2 @@
+* * * * * echo "HELLLOOO FROM WWWWOOOLRD" > /proc/1/fd/1 2>/proc/1/fd/2
+* * * * * cd /app && /usr/local/bin/python api_data_fetcher/main.py > /proc/1/fd/1 2>/proc/1/fd/2

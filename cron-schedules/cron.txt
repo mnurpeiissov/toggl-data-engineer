@@ -1,1 +1,0 @@
-* * * * * python /app/api_data_fetcher/main.py

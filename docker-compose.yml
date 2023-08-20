@@ -11,6 +11,8 @@ services:
       - "54321:5432"
     volumes:
       - ./data:/var/lib/postgresql/data 
+    networks:
+      - toggl-network
   crawler:
     build:
       context: .
@@ -20,18 +22,27 @@ services:
     volumes:
       - ./alembic:/app/alembic
     command:
-      # - python
-      # - api_data_fetcher/main.py
       - sh
       - entrypoint.sh
     depends_on:
       - postgres
+    networks:
+      - toggl-network
   cron:
     build:
       context: .
       dockerfile: Dockerfile
-    command: sh -c "cron -f"
-    env_file: .env
+    env_file: 
+      - .env
+    command:
+      - sh
+      - cron-schedules/cron-entrypoint.sh
+    networks:
+      - toggl-network
+
+
 volumes:
   alembic: 
   postgres:
+networks:
+  toggl-network:
