@@ -9,24 +9,29 @@ services:
       POSTGRES_PORT: 54321
     ports:
       - "54321:5432"
+    volumes:
+      - ./data:/var/lib/postgresql/data 
   crawler:
     build:
       context: .
       dockerfile: Dockerfile
     env_file: 
       - .env
+    volumes:
+      - ./alembic:/app/alembic
     command:
+      # - python
+      # - api_data_fetcher/main.py
       - sh
       - entrypoint.sh
     depends_on:
       - postgres
   cron:
-    image: alpine:latest
-    container_name: my-cron
-    volumes:
-      - ./cron-scripts:/cron-scripts
-    depends_on:
-      - postgres
-    command: sh -c "crond -f"
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: sh -c "cron -f"
     env_file: .env
-  
+volumes:
+  alembic: 
+  postgres:

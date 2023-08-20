@@ -14,21 +14,21 @@ class UsaJobs(Base):
     __tablename__ = "usa_jobs"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    title: Mapped[str]
-    position_uri: Mapped[str]
-    apply_uri: Mapped[str]
-    country: Mapped[str]
-    region: Mapped[str]
-    city: Mapped[str]
-    organization_name: Mapped[str]
-    department_name: Mapped[str]
-    job_category: Mapped[str]
-    qualification_summary: Mapped[str]
-    renumeration_min: Mapped[float]
-    renumeration_max: Mapped[float]
-    application_start_date: Mapped[date]
-    application_end_date: Mapped[date]
-    requirements: Mapped[str]
-    evaluations: Mapped[str]
-    requiremed_documents: Mapped[str]
-    relevance_rank: Mapped[int]
+    title: Mapped[str] = mapped_column(nullable=True)
+    position_uri: Mapped[str] = mapped_column(nullable=True)
+    apply_uri: Mapped[str] = mapped_column(nullable=True)
+    country: Mapped[str] = mapped_column(nullable=True)
+    region: Mapped[str] = mapped_column(nullable=True)
+    city: Mapped[str] = mapped_column(nullable=True)
+    organization_name: Mapped[str] = mapped_column(nullable=True)
+    department_name: Mapped[str] = mapped_column(nullable=True)
+    job_category: Mapped[str] = mapped_column(nullable=True)
+    qualification_summary: Mapped[str] = mapped_column(nullable=True)
+    renumeration_min: Mapped[float] = mapped_column(nullable=True)
+    renumeration_max: Mapped[float] = mapped_column(nullable=True)
+    application_start_date: Mapped[date] = mapped_column(nullable=True)
+    application_end_date: Mapped[date] = mapped_column(nullable=True)
+    requirements: Mapped[str] = mapped_column(nullable=True)
+    evaluations: Mapped[str] = mapped_column(nullable=True)
+    required_documents: Mapped[str] = mapped_column(nullable=True)
+    relevance_rank: Mapped[int] = mapped_column(nullable=True)

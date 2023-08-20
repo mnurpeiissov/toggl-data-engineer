@@ -2,7 +2,6 @@ import requests
 from http_helpers import transport_errors
 import time
 
-# PositionTitle, PositionURI, PositionLocation, PositionRemuneration
 
 def fetch_usajobs_data(url, headers, retries=3):
     errors = []
@@ -35,8 +34,8 @@ def build_job_json(response):
         "department_name": descriptor.get("DepartmentName"),
         "job_category": descriptor.get("JobCategory")[0].get("Name"),
         "qualification_summary": descriptor.get("QualificationSummary"),
-        "renumeration_min": descriptor.get("PositionRenumeration")[0]["MinimumRange"],
-        "renumeration_max": descriptor.get("PositionRenumeration")[0]["MaximumRange"],
+        "renumeration_min": descriptor.get("PositionRemuneration")[0]["MinimumRange"],
+        "renumeration_max": descriptor.get("PositionRemuneration")[0]["MaximumRange"],
         "application_start_date": descriptor.get("ApplicationStartDate"),
         "application_end_date": descriptor.get("ApplicationEndDate"),
         "requirements": descriptor.get("UserArea").get("Requirements"),
@@ -47,14 +46,11 @@ def build_job_json(response):
     return job_json
 
 
-
-
-
 def persist_usajobs_data(cursor, job):
     cursor.execute('''
-        INSERT INTO toggl.usa_jobs (id ,title, position_uri, apply_uri, country, region, city, organization_name,
+        INSERT INTO usa_jobs (id ,title, position_uri, apply_uri, country, region, city, organization_name,
                                     department_name, job_category, qualification_summary, renumeration_min,
-                                    renumeration_max, application_start, application_end, requirements, 
+                                    renumeration_max, application_start_date, application_end_date, requirements, 
                                     evaluations, required_documents, relevance_rank )
             SELECT 
                    %(id)s as id, 
@@ -70,11 +66,11 @@ def persist_usajobs_data(cursor, job):
                    %(qualification_summary)s as qualification_summary,
                    %(renumeration_min)s as renumeration_min,
                    %(renumeration_max)s as renumeration_max,
-                   %(application_start)s as application_start,
-                   %(application_end)s as application_end,
+                   %(application_start_date)s as application_start_date,
+                   %(application_end_date)s as application_end_date,
                    %(requirements)s as requirements, 
                    %(evaluations)s as evaluations,
-                   %(required_documents)s as required_documentsm 
+                   %(required_documents)s as required_documents,
                    %(relevance_rank)s as relevance_rank
             ON CONFLICT(id) DO UPDATE SET 
                    title = EXCLUDED.title, 
@@ -89,8 +85,8 @@ def persist_usajobs_data(cursor, job):
                    qualification_summary = EXCLUDED.qualification_summary, 
                    renumeration_min = EXCLUDED.renumeration_min, 
                    renumeration_max = EXCLUDED.renumeration_max, 
-                   application_start = EXCLUDED.application_start, 
-                   application_end = EXCLUDED.application_end, 
+                   application_start_date = EXCLUDED.application_start_date, 
+                   application_end_date = EXCLUDED.application_end_date, 
                    requirements = EXCLUDED.requirements, 
                    evaluations = EXCLUDED.evaluations, 
                    required_documents = EXCLUDED.required_documents, 
