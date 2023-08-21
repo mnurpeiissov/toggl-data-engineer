@@ -3,10 +3,10 @@ services:
   postgres:
     image: postgres:latest
     environment:
-      POSTGRES_USER: root
-      POSTGRES_PASSWORD: root
-      POSTGRES_DB: toggl
-      POSTGRES_PORT: 54321
+      POSTGRES_USER: ${db_user}
+      POSTGRES_PASSWORD: ${db_pass}
+      POSTGRES_DB: ${db_name}
+      POSTGRES_PORT: ${db_port}
     ports:
       - "54321:5432"
     volumes:
