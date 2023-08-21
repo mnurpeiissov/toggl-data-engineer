@@ -7,10 +7,21 @@ PGPASSWORD=$db_pass psql -U ${db_user} -h ${db_host} -p ${db_port} -d ${db_name}
 
 if [ $? -eq 0 ]; then
     echo "Tables exist .."
+    alembic upgrade head
 else
     alembic revision --autogenerate -m "Create usa_jobs table"
     alembic upgrade head
 
 fi
 
-#python /app/api_data_fetcher/main.py
+row_count=$(PGPASSWORD=$db_pass psql -U ${db_user} -h ${db_host} -p ${db_port} -d ${db_name} -c "SELECT * FROM usa_jobs LIMIT 10;" -t)
+
+if [ $row_count -gt 0 ]; then
+    echo "The table usa_jobs already has data, skipping initial data ingestion pipeline."
+else
+    echo "The table usa_jobs is empty."
+    echo "Starting data ingestion pipeline"
+    python /app/api_data_fetcher/main.py
+fi
+
+

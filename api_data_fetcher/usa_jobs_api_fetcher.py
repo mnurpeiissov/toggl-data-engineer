@@ -1,5 +1,5 @@
 import requests
-from http_helpers import transport_errors
+from utils import safe_get, request_errors
 import time
 
 
@@ -11,46 +11,53 @@ def fetch_usajobs_data(url, headers, retries=3):
             response = requests.get(url, headers=headers)
             if response.status_code == 200:
                 break
-        except transport_errors as ex:
+        except request_errors as ex:
             errors.append(ex)
             time.sleep(10)
 
     if response and response.status_code != 200:
         print(f'Could not fetch {url} with following errors: {errors}')
-    
-    return response.json()
+
+    return response.json() if response else {}
 
 def build_job_json(response):
+    '''
+        build dict from response with required fields
+    '''
     descriptor = response.get("MatchedObjectDescriptor")
     job_json = {
         "id": response.get("MatchedObjectId"), 
         "title": descriptor.get('PositionTitle'),
         "position_uri": descriptor.get("PositionURI"),
         "apply_uri": descriptor.get("ApplyURI"),
-        "country": descriptor.get("PositionLocation")[0].get("CountryCode"),
-        "region": descriptor.get("PositionLocation")[0].get("CountrySubDivisionCode"),
-        "city": descriptor.get("PositionLocation")[0].get("CityName"),
+        "country": safe_get(descriptor, "PositionLocation", 0, "CountryCode"), 
+        "region": safe_get(descriptor, "PositionLocation", 0, "CountrySubDivisionCode"),
+        "city": safe_get(descriptor, "PositionLocation", 0 , "CityName"),
         "organization_name": descriptor.get("OrganizationName"),
         "department_name": descriptor.get("DepartmentName"),
-        "job_category": descriptor.get("JobCategory")[0].get("Name"),
+        "job_category": safe_get(descriptor, "JobCategory", 0, "Name"),
         "qualification_summary": descriptor.get("QualificationSummary"),
-        "renumeration_min": descriptor.get("PositionRemuneration")[0]["MinimumRange"],
-        "renumeration_max": descriptor.get("PositionRemuneration")[0]["MaximumRange"],
+        "remuneration_min": safe_get(descriptor, "PositionRemuneration", 0, "MinimumRange"),
+        "remuneration_max": safe_get(descriptor, "PositionRemuneration", 0, "MaximumRange"),
         "application_start_date": descriptor.get("ApplicationStartDate"),
         "application_end_date": descriptor.get("ApplicationEndDate"),
-        "requirements": descriptor.get("UserArea").get("Requirements"),
-        "evaluations": descriptor.get("UserArea").get("Evaluations"),
-        "required_documents": descriptor.get("UserArea").get("RequiredDocuments"),
+        "requirements": safe_get(descriptor, "UserArea", "Requirements"),
+        "evaluations": safe_get(descriptor, "UserArea", "Evaluations"),
+        "required_documents": safe_get("UserArea", "RequiredDocuments"),            
         "relevance_rank": response.get("RelevanceRank")
     }
     return job_json
 
 
 def persist_usajobs_data(cursor, job):
+    '''
+        Upsert the job, if it exists and there are changes it will update the existing job and if it does not
+        exist, it will insert the new job
+    '''
     cursor.execute('''
         INSERT INTO usa_jobs (id ,title, position_uri, apply_uri, country, region, city, organization_name,
-                                    department_name, job_category, qualification_summary, renumeration_min,
-                                    renumeration_max, application_start_date, application_end_date, requirements, 
+                                    department_name, job_category, qualification_summary, remuneration_min,
+                                    remuneration_max, application_start_date, application_end_date, requirements, 
                                     evaluations, required_documents, relevance_rank )
             SELECT 
                    %(id)s as id, 
@@ -64,8 +71,8 @@ def persist_usajobs_data(cursor, job):
                    %(department_name)s as department_name, 
                    %(job_category)s as job_category,
                    %(qualification_summary)s as qualification_summary,
-                   %(renumeration_min)s as renumeration_min,
-                   %(renumeration_max)s as renumeration_max,
+                   %(remuneration_min)s as remuneration_min,
+                   %(remuneration_max)s as remuneration_max,
                    %(application_start_date)s as application_start_date,
                    %(application_end_date)s as application_end_date,
                    %(requirements)s as requirements, 
@@ -83,8 +90,8 @@ def persist_usajobs_data(cursor, job):
                    department_name = EXCLUDED.department_name, 
                    job_category = EXCLUDED.job_category, 
                    qualification_summary = EXCLUDED.qualification_summary, 
-                   renumeration_min = EXCLUDED.renumeration_min, 
-                   renumeration_max = EXCLUDED.renumeration_max, 
+                   remuneration_min = EXCLUDED.remuneration_min, 
+                   remuneration_max = EXCLUDED.remuneration_max, 
                    application_start_date = EXCLUDED.application_start_date, 
                    application_end_date = EXCLUDED.application_end_date, 
                    requirements = EXCLUDED.requirements, 
