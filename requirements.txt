@@ -2,5 +2,3 @@ alembic
 requests
 psycopg2-binary
 sqlalchemy
-httplib2
-urllib3
