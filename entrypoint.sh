@@ -14,9 +14,9 @@ else
 
 fi
 
-row_count=$(PGPASSWORD=$db_pass psql -U ${db_user} -h ${db_host} -p ${db_port} -d ${db_name} -c "SELECT * FROM usa_jobs LIMIT 10;" -t)
+output=$(PGPASSWORD=$db_pass psql -U "${db_user}" -h "${db_host}" -p "${db_port}" -d "${db_name}" -c "SELECT count(*) FROM usa_jobs LIMIT 10;" -t)
 
-if [ $row_count -gt 0 ]; then
+if [ $? -eq 0 ] && [ "$output" -gt 0 ]; then
     echo "The table usa_jobs already has data, skipping initial data ingestion pipeline."
 else
     echo "The table usa_jobs is empty."
